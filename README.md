@@ -5,6 +5,12 @@ measurably improve real words-per-minute, not just test it.
 
 🔗 **Live demo:** https://ghravenlabs.github.io/WPM-Trainer/
 
+![WPM Trainer screenshot](assets/screenshot.png)
+
+## Portfolio proof
+- [Case study](PORTFOLIO-CASE-STUDY.md) — how the app turns a simple typing test into a training loop.
+- GitHub Actions smoke check verifies the static app file, saved-progress behavior hooks, and README links on every push.
+
 ## Features
 - **Live test** — Easy/Medium/Hard text, 15/30/60s, with **net WPM, accuracy, errors** updating as you type
 - **Per-character error highlighting** + blinking caret
