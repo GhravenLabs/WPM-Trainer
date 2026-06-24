@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WPM Trainer — hit 50+</title>
+<style>
+  :root{
+    --bg:#12121c; --panel:#1b1b2a; --panel2:#23233a; --line:#2e2e46;
+    --text:#e9e9f4; --dim:#9a9ab8; --accent:#ffd23f; --accent2:#2dd4bf;
+    --good:#2ecc71; --bad:#ff5e7e; --cur:#ffd23f;
+    --LP:#ff6b9d;--LR:#ff9f43;--LM:#feca57;--LI:#1dd1a1;
+    --RI:#54a0ff;--RM:#a55eff;--RR:#c56cf0;--RP:#ff7f50;--TH:#7f8fa6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(900px 600px at 80% -10%,#1d1d33,#12121c 60%);
+    color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    padding:24px;min-height:100vh}
+  .wrap{max-width:980px;margin:0 auto}
+  header{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+  h1{font-size:24px;margin:0;letter-spacing:-.02em}
+  h1 .z{color:var(--accent)}
+  .goal{display:flex;gap:10px;flex-wrap:wrap}
+  .chip{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 14px;font-size:13px;color:var(--dim)}
+  .chip b{color:var(--text);font-size:16px}
+  .chip.hit b{color:var(--good)}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .seg button{background:none;border:none;color:var(--dim);padding:8px 13px;font-size:13px;cursor:pointer;font-weight:600}
+  .seg button.on{background:var(--accent);color:#1a1a1a}
+  .seg button:hover:not(.on){color:var(--text)}
+  .tbtn{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:12px;
+    padding:8px 14px;font-size:13px;cursor:pointer;font-weight:600}
+  .tbtn:hover{border-color:var(--accent2)}
+  .tbtn.drill{border-color:var(--accent2);color:var(--accent2)}
+  .stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 18px;min-width:96px;flex:1}
+  .stat .l{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim)}
+  .stat .v{font-size:30px;font-weight:800;line-height:1.1}
+  .stat.wpm .v{color:var(--accent)}
+  .stat.acc .v{color:var(--accent2)}
+  #box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px 28px;
+    font-family:"Consolas","SF Mono","Courier New",monospace;font-size:24px;line-height:1.9;
+    letter-spacing:.5px;outline:none;cursor:text;position:relative;min-height:120px;user-select:none}
+  #box:focus{border-color:var(--accent)}
+  #box .ch{color:#62627e;transition:color .05s}
+  #box .ch.ok{color:var(--text)}
+  #box .ch.bad{color:var(--bad);background:rgba(255,94,126,.16);border-radius:3px}
+  #box .ch.cur{border-left:2px solid var(--cur);margin-left:-2px;animation:blink 1s step-end infinite}
+  @keyframes blink{50%{border-color:transparent}}
+  .focushint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:rgba(18,18,28,.7);border-radius:16px;color:var(--dim);font-family:sans-serif;font-size:15px;cursor:pointer}
+  .hide{display:none!important}
+  .row2{display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+  .card h3{margin:0 0 10px;font-size:14px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+  /* keyboard */
+  .kb{display:flex;flex-direction:column;gap:6px;align-items:center}
+  .kr{display:flex;gap:6px}
+  .key{width:38px;height:38px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:13px;font-family:monospace;color:var(--dim);
+    border-bottom-width:3px}
+  .key.sp{width:240px}
+  .key.next{transform:translateY(-3px);box-shadow:0 0 0 2px var(--accent);color:#fff}
+  .fLP{border-bottom-color:var(--LP)} .fLR{border-bottom-color:var(--LR)}
+  .fLM{border-bottom-color:var(--LM)} .fLI{border-bottom-color:var(--LI)}
+  .fRI{border-bottom-color:var(--RI)} .fRM{border-bottom-color:var(--RM)}
+  .fRR{border-bottom-color:var(--RR)} .fRP{border-bottom-color:var(--RP)}
+  .fTH{border-bottom-color:var(--TH)}
+  .nexttip{text-align:center;margin-top:10px;font-size:14px;color:var(--dim);min-height:20px}
+  .nexttip b{color:var(--text)}
+  /* finger legend */
+  .legend{display:flex;flex-wrap:wrap;gap:8px}
+  .lg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim)}
+  .sw{width:14px;height:14px;border-radius:4px}
+  .tips{font-size:13px;color:var(--dim);line-height:1.6;margin:8px 0 0}
+  .tips b{color:var(--text)}
+  /* progress */
+  .pgrid{display:flex;gap:12px;flex-wrap:wrap}
+  .pmini{background:var(--panel2);border-radius:12px;padding:10px 14px;flex:1;min-width:90px}
+  .pmini .l{font-size:11px;color:var(--dim);text-transform:uppercase}
+  .pmini .v{font-size:22px;font-weight:800}
+  .spark{margin-top:12px}
+  /* overlay */
+  .overlay{position:fixed;inset:0;background:rgba(10,10,18,.78);display:flex;align-items:center;justify-content:center;z-index:20;padding:20px}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:28px 30px;max-width:440px;width:100%;text-align:center}
+  .modal .big{font-size:58px;font-weight:900;color:var(--accent);line-height:1}
+  .modal .lab{color:var(--dim);font-size:13px;text-transform:uppercase;letter-spacing:.1em}
+  .modal .msg{font-size:16px;margin:14px 0 18px;line-height:1.5}
+  .modal .sub{display:flex;gap:14px;justify-content:center;margin:10px 0 6px}
+  .modal .sub div{font-size:13px;color:var(--dim)} .modal .sub b{color:var(--text);font-size:18px;display:block}
+  .ftr{color:var(--dim);font-size:12px;text-align:center;margin-top:22px;line-height:1.6}
+  a{color:var(--accent2)}
+  .conf{position:fixed;top:-10px;font-size:18px;z-index:30;pointer-events:none;animation:fall 2.2s linear forwards}
+  @keyframes fall{to{transform:translateY(105vh) rotate(540deg);opacity:.9}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>⌨️ WPM <span class="z">Trainer</span></h1>
+    <div class="goal">
+      <div class="chip">goal <b>50</b> wpm</div>
+      <div class="chip" id="chipBest">best <b id="best">—</b></div>
+      <div class="chip" id="chipStreak">🔥 streak <b id="streak">0</b></div>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <div class="seg" id="diffSeg">
+      <button data-d="easy" class="on">Easy</button>
+      <button data-d="medium">Medium</button>
+      <button data-d="hard">Hard</button>
+    </div>
+    <div class="seg" id="timeSeg">
+      <button data-t="15">15s</button>
+      <button data-t="30" class="on">30s</button>
+      <button data-t="60">60s</button>
+    </div>
+    <button class="tbtn drill" id="drillBtn" title="Practice your most-mistyped keys">🎯 Weak-key drill</button>
+    <button class="tbtn" id="customBtn">✎ Custom text</button>
+    <button class="tbtn" id="restartBtn">↻ Restart (Tab)</button>
+    <button class="tbtn" id="kbBtn">⌨ Keyboard: on</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat wpm"><div class="l">WPM (net)</div><div class="v" id="wpm">0</div></div>
+    <div class="stat acc"><div class="l">Accuracy</div><div class="v" id="acc">100%</div></div>
+    <div class="stat"><div class="l">Time</div><div class="v" id="time">30</div></div>
+    <div class="stat"><div class="l">Errors</div><div class="v" id="err">0</div></div>
+  </div>
+
+  <div id="box" tabindex="0">
+    <div id="text"></div>
+    <div class="focushint" id="focushint">Click here and start typing</div>
+  </div>
+
+  <div class="nexttip" id="nexttip"></div>
+
+  <div class="row2">
+    <div class="card" id="kbCard">
+      <h3>Finger keyboard — next key glows</h3>
+      <div class="kb" id="kb"></div>
+    </div>
+
+    <div class="card">
+      <h3>Finger guide</h3>
+      <div class="legend" id="legend"></div>
+      <p class="tips">
+        <b>Home row:</b> left hand on <b>A S D F</b>, right hand on <b>J K L ;</b>.
+        Feel the little bumps on <b>F</b> and <b>J</b> — your index fingers live there, eyes off the keyboard.
+        <b>Thumbs</b> rest on the space bar. Each finger only reaches its own colored keys, then returns home.<br>
+        <b>How to actually hit 50+:</b> slow down for <b>accuracy first</b> — errors cost more than speed. Keep a
+        steady rhythm, don't look down, and do a 5-min weak-key drill daily. Speed follows accuracy.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Progress toward 50</h3>
+      <div class="pgrid">
+        <div class="pmini"><div class="l">Best</div><div class="v" id="pBest" style="color:var(--accent)">—</div></div>
+        <div class="pmini"><div class="l">Avg (last 10)</div><div class="v" id="pAvg">—</div></div>
+        <div class="pmini"><div class="l">Tests done</div><div class="v" id="pCount">0</div></div>
+        <div class="pmini"><div class="l">Best accuracy</div><div class="v" id="pAcc" style="color:var(--accent2)">—</div></div>
+      </div>
+      <div class="spark" id="spark"></div>
+      <p class="tips" id="weakList"></p>
+    </div>
+  </div>
+
+  <p class="ftr">Built for Raven · all data stays on this device (localStorage) · works fully offline.<br>
+  Tab = restart · pick Easy/Medium/Hard and a time · the dashed line on the chart is your 50 WPM goal.</p>
+</div>
+
+<script>
+// ---------- finger map ----------
+const FMAP={};
+const fingers={LP:"`1qaz",LR:"2wsx",LM:"3edc",LI:"45rtfgvb",RI:"67yuhjnm",RM:"8ik,",RR:"9ol.",RP:"0p;'/[]-=\\",TH:" "};
+for(const f in fingers) for(const c of fingers[f]) FMAP[c]=f;
+const FNAME={LP:"left pinky",LR:"left ring",LM:"left middle",LI:"left index",RI:"right index",RM:"right middle",RR:"right ring",RP:"right pinky",TH:"thumb"};
+const fingerOf=ch=>FMAP[(ch||"").toLowerCase()]||null;
+
+// ---------- word pools ----------
+const EASY="the and for are but not you all any can her was one our out day get has him his how man new now old see two way who boy did its let put say she too use dad mom red big run sun fun top cat dog box yes hand make time work good life year over think also back even good give most very when come here just like long".split(" ");
+const MED="people because through another between important different example children together sometimes something government development experience understand knowledge available technology especially themselves environment particular community information themselves remember business question continue education usually probably actually around morning evening project journey balance pattern habit focus growth".split(" ");
+const HARD=["Quickly,","\"speed\"","don't","it's","they're","#focus","50%","3.14","email@site.com","(2026)","C:\\path","well-known","ROI:","$1,200","x=42;","Mon-Fri","9:30am","100/100","plan-B","Q4."];
+const QUOTES=["the quick brown fox jumps over the lazy dog while the calm cat watches from the warm window sill",
+"accuracy comes before speed so type each word with control and let the rhythm carry your hands across the keys",
+"small daily practice builds real skill and before long the goal you set will feel easy and even a little slow"];
+
+function genWords(diff,n){
+  let pool = diff==="easy"?EASY : diff==="medium"?MED.concat(EASY):HARD.concat(MED);
+  if(diff==="medium" && Math.random()<.5){ // sprinkle a flowing quote
+    return QUOTES[Math.floor(Math.random()*QUOTES.length)];
+  }
+  let w=[];
+  for(let i=0;i<n;i++){ let x=pool[Math.floor(Math.random()*pool.length)];
+    if(diff!=="easy" && Math.random()<.12) x=x.charAt(0).toUpperCase()+x.slice(1);
+    w.push(x); }
+  return w.join(" ");
+}
+function genDrill(){
+  const ke=getKeyErrors();
+  let weak=Object.entries(ke).sort((a,b)=>b[1]-a[1]).map(e=>e[0]).filter(c=>/[a-z]/.test(c)).slice(0,5);
+  if(weak.length<3) weak=["a","s","d","f","j","k","l"]; // default home-row drill
+  const vow="aeiou";
+  let words=[];
+  for(let i=0;i<45;i++){
+    let len=3+Math.floor(Math.random()*3), s="";
+    for(let j=0;j<len;j++){ s += (Math.random()<.55)? weak[Math.floor(Math.random()*weak.length)] : vow[Math.floor(Math.random()*5)]; }
+    words.push(s);
+  }
+  return {text:words.join(" "), weak};
+}
+
+// ---------- state ----------
+let diff="easy", dur=30, mode="test";
+let target="", chars=[], pos=0, started=false, finished=false;
+let typed=0, correct=0, errors=0, t0=0, timer=null, timeLeft=30;
+const $=id=>document.getElementById(id);
+const box=$("box"), textEl=$("text");
+
+function buildKeyboard(){
+  const rows=["`1234567890-=","qwertyuiop[]","asdfghjkl;'","zxcvbnm,./"];
+  const kb=$("kb"); kb.innerHTML="";
+  rows.forEach(r=>{ const div=document.createElement("div"); div.className="kr";
+    for(const c of r){ const k=document.createElement("div"); const f=fingerOf(c);
+      k.className="key"+(f?" f"+f:""); k.textContent=c; k.dataset.key=c; div.appendChild(k);} kb.appendChild(div);});
+  const sp=document.createElement("div"); sp.className="kr";
+  const space=document.createElement("div"); space.className="key sp fTH"; space.textContent="space"; space.dataset.key=" ";
+  sp.appendChild(space); kb.appendChild(sp);
+  // legend
+  const lg=$("legend"); lg.innerHTML="";
+  for(const f in FNAME){ const d=document.createElement("div"); d.className="lg";
+    d.innerHTML='<span class="sw" style="background:var(--'+f+')"></span>'+FNAME[f]; lg.appendChild(d);}
+}
+function highlightNext(){
+  document.querySelectorAll(".key.next").forEach(k=>k.classList.remove("next"));
+  $("nexttip").innerHTML="";
+  if(finished||pos>=target.length) return;
+  const ch=target[pos], base=ch.toLowerCase();
+  const k=document.querySelector('.key[data-key="'+CSS.escape(base)+'"]');
+  if(k) k.classList.add("next");
+  const f=fingerOf(ch);
+  if(f){ const disp = ch===" "?"space":("'"+ch+"'");
+    $("nexttip").innerHTML="Next: <b>"+disp+"</b> &middot; use your <b>"+FNAME[f]+"</b>"+(ch!==base?" + Shift":""); }
+}
+
+function render(){
+  textEl.innerHTML="";
+  chars=[];
+  for(let i=0;i<target.length;i++){ const s=document.createElement("span");
+    s.className="ch"; s.textContent=target[i]; textEl.appendChild(s); chars.push(s);}
+  pos=0; if(chars[0]) chars[0].classList.add("cur");
+  highlightNext();
+}
+function newTest(){
+  clearInterval(timer); started=false; finished=false; typed=0; correct=0; errors=0; timeLeft=dur;
+  if(mode==="drill"){ const d=genDrill(); target=d.text; }
+  else target=genWords(diff, dur>=60?70:dur>=30?45:28);
+  render();
+  $("wpm").textContent="0"; $("acc").textContent="100%"; $("err").textContent="0"; $("time").textContent=dur;
+  $("focushint").classList.remove("hide");
+}
+
+function start(){ started=true; t0=performance.now();
+  timer=setInterval(()=>{ const el=(performance.now()-t0)/1000; timeLeft=Math.max(0,dur-el);
+    $("time").textContent=Math.ceil(timeLeft); live();
+    if(timeLeft<=0) finish(); },100);
+}
+function live(){
+  const min=Math.max((performance.now()-t0)/60000,1/600);
+  const net=Math.max(0,Math.round((correct/5)/min));
+  $("wpm").textContent=net;
+  $("acc").textContent=(typed?Math.round(correct/typed*100):100)+"%";
+  $("err").textContent=errors;
+}
+function finish(){
+  if(finished) return; finished=true; clearInterval(timer);
+  const min=Math.max((performance.now()-t0)/60000,1/600);
+  const net=Math.max(0,Math.round((correct/5)/min));
+  const accP=typed?Math.round(correct/typed*100):100;
+  live();
+  if(mode==="test") saveResult(net,accP);
+  showResult(net,accP);
+}
+
+box.addEventListener("keydown",e=>{
+  if(e.key==="Tab"){e.preventDefault(); newTest(); return;}
+  if(finished) return;
+  if(e.key==="Backspace"){ e.preventDefault();
+    if(pos>0){ chars[pos] && chars[pos].classList.remove("cur");
+      pos--; const c=chars[pos]; if(c.classList.contains("bad")) {} c.classList.remove("ok","bad"); c.classList.add("cur"); }
+    highlightNext(); return; }
+  if(e.key.length!==1) return; // ignore shift/ctrl/arrows etc.
+  e.preventDefault();
+  if(!started){ start(); $("focushint").classList.add("hide"); }
+  if(pos>=target.length) return;
+  const want=target[pos], got=e.key;
+  typed++;
+  const c=chars[pos]; c.classList.remove("cur");
+  if(got===want){ c.classList.add("ok"); correct++; }
+  else{ c.classList.add("bad"); errors++; logKeyError(want); }
+  pos++;
+  if(chars[pos]) chars[pos].classList.add("cur");
+  highlightNext();
+  live();
+  if(pos>=target.length) finish();
+});
+box.addEventListener("focus",()=>$("focushint").classList.add("hide"));
+$("focushint").addEventListener("click",()=>box.focus());
+
+// ---------- storage ----------
+function getHist(){ try{return JSON.parse(localStorage.getItem("wpmHist")||"[]")}catch(e){return[]} }
+function getKeyErrors(){ try{return JSON.parse(localStorage.getItem("wpmKeyErr")||"{}")}catch(e){return{}} }
+function logKeyError(ch){ const k=getKeyErrors(); k[ch]=(k[ch]||0)+1; localStorage.setItem("wpmKeyErr",JSON.stringify(k)); }
+function saveResult(wpm,acc){ const h=getHist(); h.push({d:Date.now(),wpm,acc,dur,diff});
+  localStorage.setItem("wpmHist",JSON.stringify(h)); refreshProgress(); }
+
+function refreshProgress(){
+  const h=getHist();
+  const best=h.length?Math.max(...h.map(x=>x.wpm)):0;
+  const last=h.slice(-10);
+  const avg=last.length?Math.round(last.reduce((a,b)=>a+b.wpm,0)/last.length):0;
+  const bAcc=h.length?Math.max(...h.map(x=>x.acc)):0;
+  $("best").textContent=best||"—"; $("pBest").textContent=best||"—";
+  $("pAvg").textContent=avg||"—"; $("pCount").textContent=h.length; $("pAcc").textContent=(bAcc||0)+"%";
+  $("chipBest").classList.toggle("hit",best>=50);
+  // streak: consecutive most-recent tests >=50
+  let st=0; for(let i=h.length-1;i>=0;i--){ if(h[i].wpm>=50) st++; else break; } $("streak").textContent=st;
+  // sparkline
+  drawSpark(h.slice(-20).map(x=>x.wpm));
+  // weak keys
+  const ke=getKeyErrors();
+  const top=Object.entries(ke).sort((a,b)=>b[1]-a[1]).slice(0,6)
+    .map(e=>"<b>"+(e[0]===" "?"space":e[0])+"</b>×"+e[1]);
+  $("weakList").innerHTML = top.length? ("Your weak keys: "+top.join(" &nbsp; ")+" &nbsp;— hit <b>🎯 Weak-key drill</b> to train them.") : "Type a few tests and your weak keys will show here.";
+}
+function drawSpark(arr){
+  const w=560,h=90,p=8; const el=$("spark");
+  if(!arr.length){ el.innerHTML='<div class="tips">No tests yet — finish one to see your trend.</div>'; return; }
+  const max=Math.max(60,...arr), min=Math.min(30,...arr,0);
+  const X=i=>p+(arr.length<=1?0:i*(w-2*p)/(arr.length-1));
+  const Y=v=>h-p-((v-min)/(max-min))*(h-2*p);
+  const pts=arr.map((v,i)=>X(i)+","+Y(v)).join(" ");
+  const goalY=Y(50);
+  el.innerHTML='<svg viewBox="0 0 '+w+' '+h+'" width="100%" height="'+h+'">'
+    +'<line x1="'+p+'" y1="'+goalY+'" x2="'+(w-p)+'" y2="'+goalY+'" stroke="#2dd4bf" stroke-dasharray="5 5" stroke-width="1.5"/>'
+    +'<text x="'+(w-p)+'" y="'+(goalY-4)+'" fill="#2dd4bf" font-size="11" text-anchor="end">goal 50</text>'
+    +'<polyline points="'+pts+'" fill="none" stroke="#ffd23f" stroke-width="2.5" stroke-linejoin="round"/>'
+    +arr.map((v,i)=>'<circle cx="'+X(i)+'" cy="'+Y(v)+'" r="3" fill="'+(v>=50?"#2ecc71":"#ffd23f")+'"/>').join("")
+    +'</svg>';
+}
+
+// ---------- results ----------
+function showResult(wpm,acc){
+  let msg, cls="";
+  if(wpm>=50){ msg="🎉 You hit the goal! 50+ WPM — that's the level the work needs."; cls="hit"; confetti(); }
+  else if(wpm>=47) msg="So close! You're at the doorstep of 50 — a few more sessions and accuracy reps will do it.";
+  else if(wpm>=40) msg="Solid run. Slow down ~10% for accuracy — clean typing pushes net WPM up fast.";
+  else msg="Good practice. Focus on accuracy + not looking down. Speed follows. Do a weak-key drill next.";
+  const ov=document.createElement("div"); ov.className="overlay";
+  ov.innerHTML='<div class="modal"><div class="lab">net words per minute</div>'
+    +'<div class="big">'+wpm+'</div>'
+    +'<div class="sub"><div>accuracy<b>'+acc+'%</b></div><div>errors<b>'+errors+'</b></div><div>mode<b>'+(mode==="drill"?"drill":diff)+'</b></div></div>'
+    +'<div class="msg">'+msg+'</div>'
+    +'<button class="tbtn" id="again" style="width:100%;padding:12px">↻ Go again (Tab)</button></div>';
+  document.body.appendChild(ov);
+  ov.addEventListener("click",e=>{ if(e.target===ov||e.target.id==="again"){ ov.remove(); newTest(); box.focus(); }});
+}
+function confetti(){ const em=["🎉","⭐","🔥","✨","💪","🏆"];
+  for(let i=0;i<28;i++){ const s=document.createElement("div"); s.className="conf";
+    s.textContent=em[Math.floor(Math.random()*em.length)];
+    s.style.left=Math.random()*100+"vw"; s.style.animationDelay=(Math.random()*.6)+"s";
+    s.style.fontSize=(14+Math.random()*16)+"px"; document.body.appendChild(s);
+    setTimeout(()=>s.remove(),2600);} }
+
+// ---------- controls ----------
+$("diffSeg").addEventListener("click",e=>{ if(!e.target.dataset.d)return;
+  diff=e.target.dataset.d; mode="test"; setSeg("diffSeg",e.target); newTest(); box.focus(); });
+$("timeSeg").addEventListener("click",e=>{ if(!e.target.dataset.t)return;
+  dur=+e.target.dataset.t; timeLeft=dur; setSeg("timeSeg",e.target); newTest(); box.focus(); });
+function setSeg(id,btn){ document.querySelectorAll("#"+id+" button").forEach(b=>b.classList.remove("on")); btn.classList.add("on"); }
+$("drillBtn").addEventListener("click",()=>{ mode="drill"; newTest(); box.focus();
+  $("nexttip").innerHTML="<b>Weak-key drill</b> — repetition on the keys you miss most. Go slow + accurate."; });
+$("restartBtn").addEventListener("click",()=>{ newTest(); box.focus(); });
+$("customBtn").addEventListener("click",()=>{ const t=prompt("Paste your own practice text:");
+  if(t&&t.trim()){ mode="test"; target=t.trim(); finished=false;started=false;typed=correct=errors=0;timeLeft=dur;
+    render(); $("wpm").textContent="0";$("acc").textContent="100%";$("err").textContent="0";$("time").textContent=dur;
+    $("focushint").classList.remove("hide"); box.focus(); } });
+let kbOn=true;
+$("kbBtn").addEventListener("click",()=>{ kbOn=!kbOn; $("kbCard").classList.toggle("hide",!kbOn);
+  $("kbBtn").textContent="⌨ Keyboard: "+(kbOn?"on":"off"); });
+
+// init
+buildKeyboard(); refreshProgress(); newTest();
+window.addEventListener("DOMContentLoaded",()=>box.focus());
+box.focus();
+</script>
+</body>
+</html>
