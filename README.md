@@ -3,7 +3,7 @@
 A clean, **zero-dependency** typing-speed trainer that runs entirely in the browser — built to
 measurably improve real words-per-minute, not just test it.
 
-🔗 **Live demo:** _[enable GitHub Pages → URL goes here]_
+🔗 **Live demo:** https://ghravenlabs.github.io/WPM-Trainer/
 
 ## Features
 - **Live test** — Easy/Medium/Hard text, 15/30/60s, with **net WPM, accuracy, errors** updating as you type
