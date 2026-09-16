@@ -311,11 +311,32 @@ box.addEventListener("focus",()=>$("focushint").classList.add("hide"));
 $("focushint").addEventListener("click",()=>box.focus());
 
 // ---------- storage ----------
-function getHist(){ try{return JSON.parse(localStorage.getItem("wpmHist")||"[]")}catch(e){return[]} }
-function getKeyErrors(){ try{return JSON.parse(localStorage.getItem("wpmKeyErr")||"{}")}catch(e){return{}} }
-function logKeyError(ch){ const k=getKeyErrors(); k[ch]=(k[ch]||0)+1; localStorage.setItem("wpmKeyErr",JSON.stringify(k)); }
+const sessionStorageFallback = new Map();
+function readStored(key){
+  if(sessionStorageFallback.has(key)) return sessionStorageFallback.get(key);
+  try{return localStorage.getItem(key);}catch(e){return null;}
+}
+function writeStored(key,value){
+  try{localStorage.setItem(key,value); sessionStorageFallback.delete(key);}
+  catch(e){sessionStorageFallback.set(key,value);
+    let notice=$("storageNotice");
+    if(!notice){notice=document.createElement("p");notice.id="storageNotice";
+      notice.className="tips";notice.setAttribute("role","status");document.body.appendChild(notice);}
+    notice.textContent="Browser storage is unavailable. Progress is kept for this session only.";
+  }
+}
+function getHist(){ try{
+  const h=JSON.parse(readStored("wpmHist")||"[]");
+  return Array.isArray(h)?h.filter(x=>x && Number.isFinite(x.wpm) && x.wpm>=0 && Number.isFinite(x.acc) && x.acc>=0 && x.acc<=100):[];
+}catch(e){return[]} }
+function getKeyErrors(){ try{
+  const k=JSON.parse(readStored("wpmKeyErr")||"{}");
+  if(!k || typeof k!=="object" || Array.isArray(k)) return {};
+  return Object.fromEntries(Object.entries(k).filter(([ch,n])=>ch.length===1 && Number.isSafeInteger(n) && n>0));
+}catch(e){return{}} }
+function logKeyError(ch){ const k=getKeyErrors(); k[ch]=(k[ch]||0)+1; writeStored("wpmKeyErr",JSON.stringify(k)); }
 function saveResult(wpm,acc){ const h=getHist(); h.push({d:Date.now(),wpm,acc,dur,diff});
-  localStorage.setItem("wpmHist",JSON.stringify(h)); refreshProgress(); }
+  writeStored("wpmHist",JSON.stringify(h)); refreshProgress(); }
 
 function refreshProgress(){
   const h=getHist();
@@ -385,7 +406,7 @@ $("drillBtn").addEventListener("click",()=>{ mode="drill"; newTest(); box.focus(
   $("nexttip").innerHTML="<b>Weak-key drill</b> — repetition on the keys you miss most. Go slow + accurate."; });
 $("restartBtn").addEventListener("click",()=>{ newTest(); box.focus(); });
 $("customBtn").addEventListener("click",()=>{ const t=prompt("Paste your own practice text:");
-  if(t&&t.trim()){ mode="test"; target=t.trim(); finished=false;started=false;typed=correct=errors=0;timeLeft=dur;
+  if(t&&t.trim()){ clearInterval(timer); timer=null; mode="test"; target=t.trim(); finished=false;started=false;typed=correct=errors=0;timeLeft=dur;
     render(); $("wpm").textContent="0";$("acc").textContent="100%";$("err").textContent="0";$("time").textContent=dur;
     $("focushint").classList.remove("hide"); box.focus(); } });
 let kbOn=true;

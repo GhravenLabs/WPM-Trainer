@@ -9,7 +9,7 @@ measurably improve real words-per-minute, not just test it.
 
 ## Portfolio proof
 - [Case study](PORTFOLIO-CASE-STUDY.md) — how the app turns a simple typing test into a training loop.
-- GitHub Actions smoke check verifies the static app file, saved-progress behavior hooks, and README links on every push.
+- GitHub Actions runs regression tests for saved progress and session controls, plus static app checks, on every push.
 
 ## Features
 - **Live test** — Easy/Medium/Hard text, 15/30/60s, with **net WPM, accuracy, errors** updating as you type
@@ -30,6 +30,13 @@ measurably improve real words-per-minute, not just test it.
 
 ## Privacy
 Everything runs client-side; your stats live only in your browser's `localStorage`.
+If browser storage is blocked or full, practice continues with session-only progress and a
+visible notice. That temporary progress disappears when the page closes. Invalid saved entries
+are ignored so they cannot prevent the trainer from starting.
+
+## Development checks
+
+Run `node --test tests/trainer.test.cjs` with Node.js 24. No package install is needed.
 
 ## License
 MIT © Rolly Calma ([Ghraven](https://github.com/Ghraven))
