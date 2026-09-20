@@ -74,3 +74,24 @@ test('custom text stops the old timer and resets the test', () => {
   assert.equal(vm.runInContext('target', context), 'custom practice');
   assert.equal(nodes.get('time').textContent, 30);
 });
+
+test('keyboard shortcuts and IME composition do not start or score a test', () => {
+  for (const extra of [{ctrlKey: true}, {metaKey: true}, {isComposing: true}]) {
+    const {context, nodes} = trainer();
+    let prevented = false;
+    nodes.get('box').listeners.keydown({key: 'a', ...extra,
+      preventDefault(){prevented = true;}});
+    assert.equal(vm.runInContext('started', context), false);
+    assert.equal(vm.runInContext('typed', context), 0);
+    assert.equal(prevented, false);
+  }
+});
+
+test('ordinary typing and AltGraph input still reach the trainer', () => {
+  for (const extra of [{}, {ctrlKey: true, altKey: true, getModifierState: key => key === 'AltGraph'}]) {
+    const {context, nodes} = trainer();
+    nodes.get('box').listeners.keydown({key: 'a', ...extra, preventDefault(){}});
+    assert.equal(vm.runInContext('started', context), true);
+    assert.equal(vm.runInContext('typed', context), 1);
+  }
+});

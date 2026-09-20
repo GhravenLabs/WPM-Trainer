@@ -286,6 +286,8 @@ function finish(){
 }
 
 box.addEventListener("keydown",e=>{
+  const altGraph=e.getModifierState?.("AltGraph");
+  if(e.isComposing || ((e.ctrlKey || e.metaKey) && !altGraph)) return;
   if(e.key==="Tab"){e.preventDefault(); newTest(); return;}
   if(finished) return;
   if(e.key==="Backspace"){ e.preventDefault();
