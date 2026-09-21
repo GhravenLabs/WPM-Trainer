@@ -19,6 +19,10 @@ measurably improve real words-per-minute, not just test it.
 - **Progress tracking** — best, average, streak, and a sparkline with your goal line (all saved locally)
 - **Custom text** + a celebratory confetti when you beat your goal
 
+Custom practice converts pasted line breaks, tabs, and other whitespace runs to a
+single ordinary space so multiline text can be typed using the spacebar. Cancelling
+the prompt or pasting only whitespace keeps the current session running.
+
 ## Tech
 - **Vanilla HTML/CSS/JavaScript** — no frameworks, no build step, no dependencies
 - `localStorage` for progress + weak-key history · `IntersectionObserver`-free, pure DOM

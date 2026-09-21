@@ -408,7 +408,7 @@ $("drillBtn").addEventListener("click",()=>{ mode="drill"; newTest(); box.focus(
   $("nexttip").innerHTML="<b>Weak-key drill</b> — repetition on the keys you miss most. Go slow + accurate."; });
 $("restartBtn").addEventListener("click",()=>{ newTest(); box.focus(); });
 $("customBtn").addEventListener("click",()=>{ const t=prompt("Paste your own practice text:");
-  if(t&&t.trim()){ clearInterval(timer); timer=null; mode="test"; target=t.trim(); finished=false;started=false;typed=correct=errors=0;timeLeft=dur;
+  if(t&&t.trim()){ clearInterval(timer); timer=null; mode="test"; target=t.trim().replace(/\s+/g," "); finished=false;started=false;typed=correct=errors=0;timeLeft=dur;
     render(); $("wpm").textContent="0";$("acc").textContent="100%";$("err").textContent="0";$("time").textContent=dur;
     $("focushint").classList.remove("hide"); box.focus(); } });
 let kbOn=true;

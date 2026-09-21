@@ -95,3 +95,27 @@ test('ordinary typing and AltGraph input still reach the trainer', () => {
     assert.equal(vm.runInContext('typed', context), 1);
   }
 });
+
+test('multiline custom text can be completed with ordinary spaces', () => {
+  const {context, nodes} = trainer();
+  context.prompt = () => '  alpha\r\n beta\tgamma\u00a0delta  ';
+  nodes.get('customBtn').listeners.click();
+  assert.equal(vm.runInContext('target', context), 'alpha beta gamma delta');
+  for (const key of 'alpha beta gamma delta') {
+    nodes.get('box').listeners.keydown({key, preventDefault(){}});
+  }
+  assert.equal(vm.runInContext('finished', context), true);
+  assert.equal(vm.runInContext('errors', context), 0);
+  assert.equal(vm.runInContext('getHist().at(-1).acc', context), 100);
+});
+
+test('whitespace-only custom text keeps the current session intact', () => {
+  const {context, nodes, cleared} = trainer();
+  context.start();
+  const previousTarget = vm.runInContext('target', context);
+  context.prompt = () => '\r\n\t\u00a0';
+  nodes.get('customBtn').listeners.click();
+  assert.equal(vm.runInContext('target', context), previousTarget);
+  assert.equal(vm.runInContext('started', context), true);
+  assert.equal(cleared.includes(42), false);
+});
