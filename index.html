@@ -217,6 +217,7 @@ function genDrill(){
 let diff="easy", dur=30, mode="test";
 let target="", chars=[], pos=0, started=false, finished=false;
 let typed=0, correct=0, errors=0, t0=0, timer=null, timeLeft=30;
+let resultOverlay=null;
 const $=id=>document.getElementById(id);
 const box=$("box"), textEl=$("text");
 
@@ -255,6 +256,7 @@ function render(){
   highlightNext();
 }
 function newTest(){
+  if(resultOverlay){ resultOverlay.remove(); resultOverlay=null; }
   clearInterval(timer); started=false; finished=false; typed=0; correct=0; errors=0; timeLeft=dur;
   if(mode==="drill"){ const d=genDrill(); target=d.text; }
   else target=genWords(diff, dur>=60?70:dur>=30?45:28);
@@ -389,7 +391,8 @@ function showResult(wpm,acc){
     +'<div class="msg">'+msg+'</div>'
     +'<button class="tbtn" id="again" style="width:100%;padding:12px">↻ Go again (Tab)</button></div>';
   document.body.appendChild(ov);
-  ov.addEventListener("click",e=>{ if(e.target===ov||e.target.id==="again"){ ov.remove(); newTest(); box.focus(); }});
+  resultOverlay=ov;
+  ov.addEventListener("click",e=>{ if(e.target===ov||e.target.id==="again"){ newTest(); box.focus(); }});
 }
 function confetti(){ const em=["🎉","⭐","🔥","✨","💪","🏆"];
   for(let i=0;i<28;i++){ const s=document.createElement("div"); s.className="conf";

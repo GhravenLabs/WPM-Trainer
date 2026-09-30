@@ -10,7 +10,7 @@ function trainer(storage = {}) {
   const nodes = new Map(), cleared = [];
   const element = () => ({style: {}, dataset: {}, children: [], listeners: {},
     classList: {add(){}, remove(){}, toggle(){}, contains(){return false;}},
-    appendChild(child){this.children.push(child); if(child.id) nodes.set(child.id, child);}, focus(){}, setAttribute(){},
+    appendChild(child){this.children.push(child); if(child.id) nodes.set(child.id, child);}, remove(){this.removed = true;}, focus(){}, setAttribute(){},
     addEventListener(name, callback){this.listeners[name] = callback;}});
   const context = vm.createContext({
     document: { getElementById(id){if(id === 'storageNotice') return nodes.get(id) || null; if(!nodes.has(id)) nodes.set(id, element()); return nodes.get(id);},
@@ -118,4 +118,30 @@ test('whitespace-only custom text keeps the current session intact', () => {
   assert.equal(vm.runInContext('target', context), previousTarget);
   assert.equal(vm.runInContext('started', context), true);
   assert.equal(cleared.includes(42), false);
+});
+
+test('Tab dismisses the result overlay before restarting practice', () => {
+  const {context, nodes} = trainer();
+  context.start();
+  context.finish();
+  const overlay = context.document.body.children.find(el => el.className === 'overlay');
+  assert.ok(overlay);
+  nodes.get('box').listeners.keydown({key: 'Tab', preventDefault(){}});
+  assert.equal(overlay.removed, true);
+  assert.equal(vm.runInContext('finished', context), false);
+  assert.equal(vm.runInContext('started', context), false);
+  assert.equal(vm.runInContext('getHist().length', context), 1);
+  nodes.get('box').listeners.keydown({key: 'a', preventDefault(){}});
+  assert.equal(vm.runInContext('started', context), true);
+});
+
+test('clicking Go again dismisses the result and resets practice', () => {
+  const {context} = trainer();
+  context.start();
+  context.finish();
+  const overlay = context.document.body.children.find(el => el.className === 'overlay');
+  overlay.listeners.click({target: {id: 'again'}});
+  assert.equal(overlay.removed, true);
+  assert.equal(vm.runInContext('finished', context), false);
+  assert.equal(vm.runInContext('started', context), false);
 });
