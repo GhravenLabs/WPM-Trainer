@@ -216,7 +216,7 @@ function genDrill(){
 // ---------- state ----------
 let diff="easy", dur=30, mode="test";
 let target="", chars=[], pos=0, started=false, finished=false;
-let typed=0, correct=0, errors=0, t0=0, timer=null, timeLeft=30;
+let typed=0, correct=0, correctAttempts=0, errors=0, t0=0, timer=null, timeLeft=30;
 let resultOverlay=null;
 const $=id=>document.getElementById(id);
 const box=$("box"), textEl=$("text");
@@ -257,7 +257,7 @@ function render(){
 }
 function newTest(){
   if(resultOverlay){ resultOverlay.remove(); resultOverlay=null; }
-  clearInterval(timer); started=false; finished=false; typed=0; correct=0; errors=0; timeLeft=dur;
+  clearInterval(timer); started=false; finished=false; typed=0; correct=0; correctAttempts=0; errors=0; timeLeft=dur;
   if(mode==="drill"){ const d=genDrill(); target=d.text; }
   else target=genWords(diff, dur>=60?70:dur>=30?45:28);
   render();
@@ -274,14 +274,14 @@ function live(){
   const min=Math.max((performance.now()-t0)/60000,1/600);
   const net=Math.max(0,Math.round((correct/5)/min));
   $("wpm").textContent=net;
-  $("acc").textContent=(typed?Math.round(correct/typed*100):100)+"%";
+  $("acc").textContent=(typed?Math.round(correctAttempts/typed*100):100)+"%";
   $("err").textContent=errors;
 }
 function finish(){
   if(finished) return; finished=true; clearInterval(timer);
   const min=Math.max((performance.now()-t0)/60000,1/600);
   const net=Math.max(0,Math.round((correct/5)/min));
-  const accP=typed?Math.round(correct/typed*100):100;
+  const accP=typed?Math.round(correctAttempts/typed*100):100;
   live();
   if(mode==="test") saveResult(net,accP);
   showResult(net,accP);
@@ -294,8 +294,8 @@ box.addEventListener("keydown",e=>{
   if(finished) return;
   if(e.key==="Backspace"){ e.preventDefault();
     if(pos>0){ chars[pos] && chars[pos].classList.remove("cur");
-      pos--; const c=chars[pos]; if(c.classList.contains("bad")) {} c.classList.remove("ok","bad"); c.classList.add("cur"); }
-    highlightNext(); return; }
+      pos--; const c=chars[pos]; if(c.classList.contains("ok")) correct--; c.classList.remove("ok","bad"); c.classList.add("cur"); }
+    highlightNext(); live(); return; }
   if(e.key.length!==1) return; // ignore shift/ctrl/arrows etc.
   e.preventDefault();
   if(!started){ start(); $("focushint").classList.add("hide"); }
@@ -303,7 +303,7 @@ box.addEventListener("keydown",e=>{
   const want=target[pos], got=e.key;
   typed++;
   const c=chars[pos]; c.classList.remove("cur");
-  if(got===want){ c.classList.add("ok"); correct++; }
+  if(got===want){ c.classList.add("ok"); correct++; correctAttempts++; }
   else{ c.classList.add("bad"); errors++; logKeyError(want); }
   pos++;
   if(chars[pos]) chars[pos].classList.add("cur");
@@ -411,7 +411,7 @@ $("drillBtn").addEventListener("click",()=>{ mode="drill"; newTest(); box.focus(
   $("nexttip").innerHTML="<b>Weak-key drill</b> — repetition on the keys you miss most. Go slow + accurate."; });
 $("restartBtn").addEventListener("click",()=>{ newTest(); box.focus(); });
 $("customBtn").addEventListener("click",()=>{ const t=prompt("Paste your own practice text:");
-  if(t&&t.trim()){ clearInterval(timer); timer=null; mode="test"; target=t.trim().replace(/\s+/g," "); finished=false;started=false;typed=correct=errors=0;timeLeft=dur;
+  if(t&&t.trim()){ clearInterval(timer); timer=null; mode="test"; target=t.trim().replace(/\s+/g," "); finished=false;started=false;typed=correct=correctAttempts=errors=0;timeLeft=dur;
     render(); $("wpm").textContent="0";$("acc").textContent="100%";$("err").textContent="0";$("time").textContent=dur;
     $("focushint").classList.remove("hide"); box.focus(); } });
 let kbOn=true;

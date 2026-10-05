@@ -8,10 +8,10 @@ const script = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8')
 
 function trainer(storage = {}) {
   const nodes = new Map(), cleared = [];
-  const element = () => ({style: {}, dataset: {}, children: [], listeners: {},
-    classList: {add(){}, remove(){}, toggle(){}, contains(){return false;}},
+  const element = () => {const classes = new Set(); return ({style: {}, dataset: {}, children: [], listeners: {},
+    classList: {add(...names){names.forEach(n => classes.add(n));}, remove(...names){names.forEach(n => classes.delete(n));}, toggle(){}, contains(n){return classes.has(n);}},
     appendChild(child){this.children.push(child); if(child.id) nodes.set(child.id, child);}, remove(){this.removed = true;}, focus(){}, setAttribute(){},
-    addEventListener(name, callback){this.listeners[name] = callback;}});
+    addEventListener(name, callback){this.listeners[name] = callback;}});};
   const context = vm.createContext({
     document: { getElementById(id){if(id === 'storageNotice') return nodes.get(id) || null; if(!nodes.has(id)) nodes.set(id, element()); return nodes.get(id);},
       createElement: element, querySelectorAll: () => [], querySelector: () => null, body: element()},
@@ -144,4 +144,31 @@ test('clicking Go again dismisses the result and resets practice', () => {
   assert.equal(overlay.removed, true);
   assert.equal(vm.runInContext('finished', context), false);
   assert.equal(vm.runInContext('started', context), false);
+});
+
+test('backspacing and retyping cannot inflate completed-character WPM', () => {
+  const {context, nodes} = trainer();
+  context.prompt = () => 'abc';
+  nodes.get('customBtn').listeners.click();
+  const type = key => nodes.get('box').listeners.keydown({key, preventDefault(){}});
+  type('a');
+  context.performance.now = () => 11000;
+  type('Backspace');
+  assert.equal(nodes.get('wpm').textContent, 0);
+  for (let i = 0; i < 10; i++) {type('a'); type('Backspace');}
+  type('a'); type('b'); type('c');
+  assert.equal(vm.runInContext('getHist().at(-1).wpm', context), 4);
+  assert.equal(vm.runInContext('getHist().at(-1).acc', context), 100);
+});
+
+test('correcting a mistake preserves attempt accuracy and error history', () => {
+  const {context, nodes} = trainer();
+  context.prompt = () => 'ab';
+  nodes.get('customBtn').listeners.click();
+  for (const key of ['x', 'Backspace', 'a', 'b']) {
+    nodes.get('box').listeners.keydown({key, preventDefault(){}});
+  }
+  assert.equal(vm.runInContext('getHist().at(-1).acc', context), 67);
+  assert.equal(vm.runInContext('errors', context), 1);
+  assert.equal(vm.runInContext('getKeyErrors().a', context), 1);
 });
