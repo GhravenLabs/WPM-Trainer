@@ -270,8 +270,9 @@ function start(){ started=true; t0=performance.now();
     $("time").textContent=Math.ceil(timeLeft); live();
     if(timeLeft<=0) finish(); },100);
 }
+function elapsedMinutes(){return Math.max(Math.min(performance.now()-t0,dur*1000)/60000,1/600);}
 function live(){
-  const min=Math.max((performance.now()-t0)/60000,1/600);
+  const min=elapsedMinutes();
   const net=Math.max(0,Math.round((correct/5)/min));
   $("wpm").textContent=net;
   $("acc").textContent=(typed?Math.round(correctAttempts/typed*100):100)+"%";
@@ -279,7 +280,9 @@ function live(){
 }
 function finish(){
   if(finished) return; finished=true; clearInterval(timer);
-  const min=Math.max((performance.now()-t0)/60000,1/600);
+  timeLeft=Math.max(0,dur-(performance.now()-t0)/1000);
+  $("time").textContent=Math.ceil(timeLeft);
+  const min=elapsedMinutes();
   const net=Math.max(0,Math.round((correct/5)/min));
   const accP=typed?Math.round(correctAttempts/typed*100):100;
   live();
@@ -292,6 +295,7 @@ box.addEventListener("keydown",e=>{
   if(e.isComposing || ((e.ctrlKey || e.metaKey) && !altGraph)) return;
   if(e.key==="Tab"){e.preventDefault(); newTest(); return;}
   if(finished) return;
+  if(started && performance.now()-t0>=dur*1000){e.preventDefault(); finish(); return;}
   if(e.key==="Backspace"){ e.preventDefault();
     if(pos>0){ chars[pos] && chars[pos].classList.remove("cur");
       pos--; const c=chars[pos]; if(c.classList.contains("ok")) correct--; c.classList.remove("ok","bad"); c.classList.add("cur"); }

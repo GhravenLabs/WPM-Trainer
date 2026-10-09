@@ -24,6 +24,33 @@ function trainer(storage = {}) {
   return {context, nodes, cleared};
 }
 
+test('expired tests reject input even before the delayed timer callback runs', () => {
+  for (const lateKey of ['b', 'Backspace']) {
+    const {context, nodes} = trainer();
+    context.prompt = () => 'abc';
+    nodes.get('customBtn').listeners.click();
+    const type = key => nodes.get('box').listeners.keydown({key, preventDefault(){}});
+    type('a');
+    context.performance.now = () => 31000; // Exactly the 30-second deadline.
+    type(lateKey);
+    assert.equal(vm.runInContext('finished', context), true);
+    assert.equal(vm.runInContext('typed', context), 1);
+    assert.equal(vm.runInContext('correct', context), 1);
+    assert.equal(nodes.get('time').textContent, 0);
+    assert.equal(vm.runInContext('getHist().length', context), 1);
+  }
+});
+
+test('delayed completion scores only the configured duration', () => {
+  const {context, nodes} = trainer();
+  context.start();
+  vm.runInContext('correct = 50; correctAttempts = 50; typed = 50;', context);
+  context.performance.now = () => 61000;
+  context.finish();
+  assert.equal(vm.runInContext('getHist().at(-1).wpm', context), 20);
+  assert.equal(nodes.get('wpm').textContent, 20);
+});
+
 test('malformed and wrong-shaped saved data do not prevent startup', () => {
   for (const value of ['{', 'null', '{}', '42', '"text"']) {
     const {context} = trainer({wpmHist: value, wpmKeyErr: value});
