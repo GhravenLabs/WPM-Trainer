@@ -24,6 +24,24 @@ function trainer(storage = {}) {
   return {context, nodes, cleared};
 }
 
+test('supplementary Unicode characters occupy one scored position', () => {
+  const {context, nodes} = trainer();
+  context.prompt = () => 'a\u{1f642}b';
+  nodes.get('customBtn').listeners.click();
+  const type = key => nodes.get('box').listeners.keydown({key, preventDefault(){}});
+  type('a');
+  type('\u{1f642}');
+  assert.equal(vm.runInContext('pos', context), 2);
+  type('Backspace');
+  assert.equal(vm.runInContext('correct', context), 1);
+  type('\u{1f642}');
+  type('b');
+  assert.equal(vm.runInContext('finished', context), true);
+  assert.equal(vm.runInContext('correct', context), 3);
+  assert.equal(vm.runInContext('errors', context), 0);
+  assert.equal(vm.runInContext('chars.length', context), 3);
+});
+
 test('expired tests reject input even before the delayed timer callback runs', () => {
   for (const lateKey of ['b', 'Backspace']) {
     const {context, nodes} = trainer();

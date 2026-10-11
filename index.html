@@ -238,8 +238,8 @@ function buildKeyboard(){
 function highlightNext(){
   document.querySelectorAll(".key.next").forEach(k=>k.classList.remove("next"));
   $("nexttip").innerHTML="";
-  if(finished||pos>=target.length) return;
-  const ch=target[pos], base=ch.toLowerCase();
+  if(finished||pos>=chars.length) return;
+  const ch=chars[pos].textContent, base=ch.toLowerCase();
   const k=document.querySelector('.key[data-key="'+CSS.escape(base)+'"]');
   if(k) k.classList.add("next");
   const f=fingerOf(ch);
@@ -250,8 +250,8 @@ function highlightNext(){
 function render(){
   textEl.innerHTML="";
   chars=[];
-  for(let i=0;i<target.length;i++){ const s=document.createElement("span");
-    s.className="ch"; s.textContent=target[i]; textEl.appendChild(s); chars.push(s);}
+  for(const ch of target){ const s=document.createElement("span");
+    s.className="ch"; s.textContent=ch; textEl.appendChild(s); chars.push(s);}
   pos=0; if(chars[0]) chars[0].classList.add("cur");
   highlightNext();
 }
@@ -300,11 +300,11 @@ box.addEventListener("keydown",e=>{
     if(pos>0){ chars[pos] && chars[pos].classList.remove("cur");
       pos--; const c=chars[pos]; if(c.classList.contains("ok")) correct--; c.classList.remove("ok","bad"); c.classList.add("cur"); }
     highlightNext(); live(); return; }
-  if(e.key.length!==1) return; // ignore shift/ctrl/arrows etc.
+  if(Array.from(e.key).length!==1) return; // ignore shift/ctrl/arrows etc.
   e.preventDefault();
   if(!started){ start(); $("focushint").classList.add("hide"); }
-  if(pos>=target.length) return;
-  const want=target[pos], got=e.key;
+  if(pos>=chars.length) return;
+  const want=chars[pos].textContent, got=e.key;
   typed++;
   const c=chars[pos]; c.classList.remove("cur");
   if(got===want){ c.classList.add("ok"); correct++; correctAttempts++; }
@@ -313,7 +313,7 @@ box.addEventListener("keydown",e=>{
   if(chars[pos]) chars[pos].classList.add("cur");
   highlightNext();
   live();
-  if(pos>=target.length) finish();
+  if(pos>=chars.length) finish();
 });
 box.addEventListener("focus",()=>$("focushint").classList.add("hide"));
 $("focushint").addEventListener("click",()=>box.focus());

@@ -23,6 +23,10 @@ Custom practice converts pasted line breaks, tabs, and other whitespace runs to 
 single ordinary space so multiline text can be typed using the spacebar. Cancelling
 the prompt or pasting only whitespace keeps the current session running.
 
+Custom text is scored by Unicode code point, including characters outside the
+basic multilingual plane. Input still uses individual key events; IME composition
+and multi-code-point grapheme input are not supported.
+
 WPM counts correct characters still present in the text, so deleting and retyping
 the same character cannot inflate speed. Accuracy and weak-key history retain all
 typing attempts, including mistakes later corrected with Backspace.
