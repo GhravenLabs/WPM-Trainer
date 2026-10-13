@@ -15,6 +15,7 @@ measurably improve real words-per-minute, not just test it.
 - **Live test** — Easy/Medium/Hard text, 15/30/60s, with **net WPM, accuracy, errors** updating as you type
 - **Per-character error highlighting** + blinking caret
 - **Finger keyboard** — color-coded by finger; the **next key glows** and tells you which finger to use (trains touch typing)
+- Shifted punctuation hints use the displayed US QWERTY layout (for example, `?` highlights `/` plus Shift); other physical layouts may differ.
 - **Weak-key drills** — records every key you mistype and generates a drill targeting *your* worst keys
 - **Progress tracking** — best, average, streak, and a sparkline with your goal line (all saved locally)
 - **Custom text** + a celebratory confetti when you beat your goal

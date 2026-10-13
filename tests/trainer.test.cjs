@@ -24,6 +24,18 @@ function trainer(storage = {}) {
   return {context, nodes, cleared};
 }
 
+test('shifted punctuation shows its US QWERTY base key and finger', () => {
+  const {context, nodes} = trainer();
+  assert.equal(vm.runInContext('baseKey("!")', context), '1');
+  assert.equal(vm.runInContext('fingerOf("?")', context), 'RP');
+  assert.equal(vm.runInContext('baseKey("|")', context), '\\');
+  context.prompt = () => '<';
+  nodes.get('customBtn').listeners.click();
+  assert.match(nodes.get('nexttip').innerHTML, /&lt;/);
+  assert.match(nodes.get('nexttip').innerHTML, /right middle/);
+  assert.match(nodes.get('nexttip').innerHTML, /\+ Shift/);
+});
+
 test('drills retain sparse weak-key history and combine letter case', () => {
   for(const counts of [{z: 5}, {z: 5, x: 2}, {Z: 3, z: 3, x: 5}]) {
     const {context} = trainer({wpmKeyErr: JSON.stringify(counts)});

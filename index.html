@@ -178,7 +178,9 @@ const FMAP={};
 const fingers={LP:"`1qaz",LR:"2wsx",LM:"3edc",LI:"45rtfgvb",RI:"67yuhjnm",RM:"8ik,",RR:"9ol.",RP:"0p;'/[]-=\\",TH:" "};
 for(const f in fingers) for(const c of fingers[f]) FMAP[c]=f;
 const FNAME={LP:"left pinky",LR:"left ring",LM:"left middle",LI:"left index",RI:"right index",RM:"right middle",RR:"right ring",RP:"right pinky",TH:"thumb"};
-const fingerOf=ch=>FMAP[(ch||"").toLowerCase()]||null;
+const SHIFTED=Object.fromEntries(Array.from('~!@#$%^&*()_+{}|:"<>?').map((ch,i)=>[ch,'`1234567890-=[]\\;\',./'[i]]));
+const baseKey=ch=>SHIFTED[ch]||(ch||"").toLowerCase();
+const fingerOf=ch=>FMAP[baseKey(ch)]||null;
 
 // ---------- word pools ----------
 const EASY="the and for are but not you all any can her was one our out day get has him his how man new now old see two way who boy did its let put say she too use dad mom red big run sun fun top cat dog box yes hand make time work good life year over think also back even good give most very when come here just like long".split(" ");
@@ -249,11 +251,12 @@ function highlightNext(){
   document.querySelectorAll(".key.next").forEach(k=>k.classList.remove("next"));
   $("nexttip").innerHTML="";
   if(finished||pos>=chars.length) return;
-  const ch=chars[pos].textContent, base=ch.toLowerCase();
+  const ch=chars[pos].textContent, base=baseKey(ch);
   const k=document.querySelector('.key[data-key="'+CSS.escape(base)+'"]');
   if(k) k.classList.add("next");
   const f=fingerOf(ch);
-  if(f){ const disp = ch===" "?"space":("'"+ch+"'");
+  if(f){ const safe=ch.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+    const disp = ch===" "?"space":("'"+safe+"'");
     $("nexttip").innerHTML="Next: <b>"+disp+"</b> &middot; use your <b>"+FNAME[f]+"</b>"+(ch!==base?" + Shift":""); }
 }
 
