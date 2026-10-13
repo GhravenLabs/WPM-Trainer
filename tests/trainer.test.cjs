@@ -24,6 +24,16 @@ function trainer(storage = {}) {
   return {context, nodes, cleared};
 }
 
+test('weak-key history retains supplementary Unicode mistakes across reloads', () => {
+  const storage = {};
+  const {context} = trainer(storage);
+  context.logKeyError('🙂');
+  context.logKeyError('🙂');
+  assert.equal(vm.runInContext('getKeyErrors()["🙂"]', context), 2);
+  const reloaded = trainer(storage);
+  assert.equal(vm.runInContext('getKeyErrors()["🙂"]', reloaded.context), 2);
+});
+
 test('supplementary Unicode characters occupy one scored position', () => {
   const {context, nodes} = trainer();
   context.prompt = () => 'a\u{1f642}b';

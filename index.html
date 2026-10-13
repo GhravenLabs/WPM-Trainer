@@ -340,7 +340,7 @@ function getHist(){ try{
 function getKeyErrors(){ try{
   const k=JSON.parse(readStored("wpmKeyErr")||"{}");
   if(!k || typeof k!=="object" || Array.isArray(k)) return {};
-  return Object.fromEntries(Object.entries(k).filter(([ch,n])=>ch.length===1 && Number.isSafeInteger(n) && n>0));
+  return Object.fromEntries(Object.entries(k).filter(([ch,n])=>Array.from(ch).length===1 && Number.isSafeInteger(n) && n>0));
 }catch(e){return{}} }
 function logKeyError(ch){ const k=getKeyErrors(); k[ch]=(k[ch]||0)+1; writeStored("wpmKeyErr",JSON.stringify(k)); }
 function saveResult(wpm,acc){ const h=getHist(); h.push({d:Date.now(),wpm,acc,dur,diff});
