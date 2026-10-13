@@ -24,6 +24,17 @@ function trainer(storage = {}) {
   return {context, nodes, cleared};
 }
 
+test('drills retain sparse weak-key history and combine letter case', () => {
+  for(const counts of [{z: 5}, {z: 5, x: 2}, {Z: 3, z: 3, x: 5}]) {
+    const {context} = trainer({wpmKeyErr: JSON.stringify(counts)});
+    const weak = Array.from(context.genDrill().weak);
+    assert.equal(weak[0], 'z');
+    assert.equal(weak.length, 3);
+    assert.equal(new Set(weak).size, 3);
+    if(counts.x) assert.equal(weak[1], 'x');
+  }
+});
+
 test('weak-key history retains supplementary Unicode mistakes across reloads', () => {
   const storage = {};
   const {context} = trainer(storage);

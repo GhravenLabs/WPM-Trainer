@@ -201,8 +201,18 @@ function genWords(diff,n){
 }
 function genDrill(){
   const ke=getKeyErrors();
-  let weak=Object.entries(ke).sort((a,b)=>b[1]-a[1]).map(e=>e[0]).filter(c=>/[a-z]/.test(c)).slice(0,5);
-  if(weak.length<3) weak=["a","s","d","f","j","k","l"]; // default home-row drill
+  const counts={};
+  for(const [ch,count] of Object.entries(ke)){
+    const key=ch.toLowerCase();
+    if(/^[a-z]$/.test(key))counts[key]=(counts[key]||0)+count;
+  }
+  let weak=Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(e=>e[0]).slice(0,5);
+  // Retain the learner's weak keys even when only one or two are known.
+  if(!weak.length) weak=["a","s","d","f","j","k","l"];
+  else for(const key of ["a","s","d","f","j","k","l"]){
+    if(weak.length>=3)break;
+    if(!weak.includes(key))weak.push(key);
+  }
   const vow="aeiou";
   let words=[];
   for(let i=0;i<45;i++){
