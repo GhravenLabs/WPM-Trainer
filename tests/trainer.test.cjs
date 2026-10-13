@@ -121,7 +121,7 @@ test('custom text stops the old timer and resets the test', () => {
 });
 
 test('keyboard shortcuts and IME composition do not start or score a test', () => {
-  for (const extra of [{ctrlKey: true}, {metaKey: true}, {isComposing: true}]) {
+  for (const extra of [{ctrlKey: true}, {metaKey: true}, {altKey: true}, {isComposing: true}]) {
     const {context, nodes} = trainer();
     let prevented = false;
     nodes.get('box').listeners.keydown({key: 'a', ...extra,

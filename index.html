@@ -292,7 +292,7 @@ function finish(){
 
 box.addEventListener("keydown",e=>{
   const altGraph=e.getModifierState?.("AltGraph");
-  if(e.isComposing || ((e.ctrlKey || e.metaKey) && !altGraph)) return;
+  if(e.isComposing || ((e.ctrlKey || e.metaKey || e.altKey) && !altGraph)) return;
   if(e.key==="Tab"){e.preventDefault(); newTest(); return;}
   if(finished) return;
   if(started && performance.now()-t0>=dur*1000){e.preventDefault(); finish(); return;}

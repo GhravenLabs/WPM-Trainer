@@ -49,7 +49,7 @@ are ignored so they cannot prevent the trainer from starting.
 ## Development checks
 
 Run `node --test tests/trainer.test.cjs` with Node.js 24. No package install is needed.
-Ctrl/Cmd shortcuts and in-progress IME composition are ignored by scoring; ordinary
+Ctrl/Cmd/Alt shortcuts and in-progress IME composition are ignored by scoring; ordinary
 characters and AltGraph input still reach the trainer. Full IME text-entry support is not implemented.
 
 ## License
