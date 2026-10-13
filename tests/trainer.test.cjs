@@ -24,6 +24,29 @@ function trainer(storage = {}) {
   return {context, nodes, cleared};
 }
 
+test('progress export includes validated history and session fallback without changing storage', async () => {
+  const storage = {};
+  const {context, nodes} = trainer(storage);
+  context.localStorage.setItem = () => {throw Error('blocked');};
+  context.saveResult(42, 95);
+  context.logKeyError('z');
+  let blob, downloaded;
+  const released = [], timers = [];
+  context.Blob = Blob;
+  context.URL = {createObjectURL(value){blob=value; return 'blob:progress';}, revokeObjectURL(value){released.push(value);}};
+  context.setTimeout = callback => timers.push(callback);
+  context.document.createElement = () => ({click(){downloaded=this.download;}});
+  nodes.get('exportBtn').listeners.click();
+  const data = JSON.parse(await blob.text());
+  assert.equal(data.version, 1);
+  assert.equal(data.history[0].wpm, 42);
+  assert.equal(data.keyErrors.z, 1);
+  assert.equal(downloaded, 'wpm-progress.json');
+  assert.deepEqual(storage, {});
+  timers.forEach(callback => callback());
+  assert.deepEqual(released, ['blob:progress']);
+});
+
 test('shifted punctuation shows its US QWERTY base key and finger', () => {
   const {context, nodes} = trainer();
   assert.equal(vm.runInContext('baseKey("!")', context), '1');

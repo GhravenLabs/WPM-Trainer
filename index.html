@@ -165,6 +165,7 @@
       </div>
       <div class="spark" id="spark"></div>
       <p class="tips" id="weakList"></p>
+      <button class="tbtn" id="exportBtn">⤓ Export progress (JSON)</button>
     </div>
   </div>
 
@@ -359,6 +360,15 @@ function logKeyError(ch){ const k=getKeyErrors(); k[ch]=(k[ch]||0)+1; writeStore
 function saveResult(wpm,acc){ const h=getHist(); h.push({d:Date.now(),wpm,acc,dur,diff});
   writeStored("wpmHist",JSON.stringify(h)); refreshProgress(); }
 
+function exportProgress(){
+  const data={version:1, exportedAt:new Date().toISOString(), history:getHist(), keyErrors:getKeyErrors()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json;charset=utf-8"});
+  const url=URL.createObjectURL(blob), link=document.createElement("a");
+  link.href=url; link.download="wpm-progress.json";
+  try {link.click();}
+  finally {setTimeout(()=>URL.revokeObjectURL(url),1000);}
+}
+
 function refreshProgress(){
   const h=getHist();
   const best=h.length?Math.max(...h.map(x=>x.wpm)):0;
@@ -419,6 +429,7 @@ function confetti(){ const em=["🎉","⭐","🔥","✨","💪","🏆"];
     setTimeout(()=>s.remove(),2600);} }
 
 // ---------- controls ----------
+$("exportBtn").addEventListener("click",exportProgress);
 $("diffSeg").addEventListener("click",e=>{ if(!e.target.dataset.d)return;
   diff=e.target.dataset.d; mode="test"; setSeg("diffSeg",e.target); newTest(); box.focus(); });
 $("timeSeg").addEventListener("click",e=>{ if(!e.target.dataset.t)return;

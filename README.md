@@ -18,6 +18,7 @@ measurably improve real words-per-minute, not just test it.
 - Shifted punctuation hints use the displayed US QWERTY layout (for example, `?` highlights `/` plus Shift); other physical layouts may differ.
 - **Weak-key drills** — records every key you mistype and generates a drill targeting *your* worst keys
 - **Progress tracking** — best, average, streak, and a sparkline with your goal line (all saved locally)
+- **Export progress** — download a versioned JSON snapshot of test history and weak-key counts, including session-only progress when browser storage is blocked. Export does not clear your history; importing backups is not yet supported.
 - **Custom text** + a celebratory confetti when you beat your goal
 
 Custom practice converts pasted line breaks, tabs, and other whitespace runs to a
