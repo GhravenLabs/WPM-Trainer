@@ -358,7 +358,7 @@ function getKeyErrors(){ try{
 }catch(e){return{}} }
 function logKeyError(ch){ const k=getKeyErrors(); k[ch]=(k[ch]||0)+1; writeStored("wpmKeyErr",JSON.stringify(k)); }
 function saveResult(wpm,acc){ const h=getHist(); h.push({d:Date.now(),wpm,acc,dur,diff});
-  writeStored("wpmHist",JSON.stringify(h)); refreshProgress(); }
+  writeStored("wpmHist",JSON.stringify(h.slice(-500))); refreshProgress(); }
 
 function exportProgress(){
   const data={version:1, exportedAt:new Date().toISOString(), history:getHist(), keyErrors:getKeyErrors()};

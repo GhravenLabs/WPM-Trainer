@@ -47,6 +47,8 @@ Everything runs client-side; your stats live only in your browser's `localStorag
 If browser storage is blocked or full, practice continues with session-only progress and a
 visible notice. That temporary progress disappears when the page closes. Invalid saved entries
 are ignored so they cannot prevent the trainer from starting.
+The newest 500 completed tests are retained, which bounds local-storage growth while preserving
+enough history for long-term progress review.
 
 ## Development checks
 

@@ -24,6 +24,17 @@ function trainer(storage = {}) {
   return {context, nodes, cleared};
 }
 
+test('saved history is capped while retaining the newest 500 results', () => {
+  const history = Array.from({length: 500}, (_, i) => ({wpm: i, acc: 90, d: i}));
+  const storage = {wpmHist: JSON.stringify(history)};
+  const {context} = trainer(storage);
+  context.saveResult(777, 99);
+  const saved = JSON.parse(storage.wpmHist);
+  assert.equal(saved.length, 500);
+  assert.equal(saved[0].wpm, 1);
+  assert.equal(saved.at(-1).wpm, 777);
+});
+
 test('progress export includes validated history and session fallback without changing storage', async () => {
   const storage = {};
   const {context, nodes} = trainer(storage);
