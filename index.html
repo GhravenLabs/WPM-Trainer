@@ -93,6 +93,11 @@
   a{color:var(--accent2)}
   .conf{position:fixed;top:-10px;font-size:18px;z-index:30;pointer-events:none;animation:fall 2.2s linear forwards}
   @keyframes fall{to{transform:translateY(105vh) rotate(540deg);opacity:.9}}
+  @media (prefers-reduced-motion: reduce){
+    #box .ch{transition:none}
+    #box .ch.cur{animation:none}
+    .conf{display:none;animation:none}
+  }
 </style>
 </head>
 <body>
@@ -421,7 +426,9 @@ function showResult(wpm,acc){
   resultOverlay=ov;
   ov.addEventListener("click",e=>{ if(e.target===ov||e.target.id==="again"){ newTest(); box.focus(); }});
 }
-function confetti(){ const em=["🎉","⭐","🔥","✨","💪","🏆"];
+function confetti(){
+  if(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches)return;
+  const em=["🎉","⭐","🔥","✨","💪","🏆"];
   for(let i=0;i<28;i++){ const s=document.createElement("div"); s.className="conf";
     s.textContent=em[Math.floor(Math.random()*em.length)];
     s.style.left=Math.random()*100+"vw"; s.style.animationDelay=(Math.random()*.6)+"s";

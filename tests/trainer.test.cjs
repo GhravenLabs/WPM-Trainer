@@ -24,6 +24,15 @@ function trainer(storage = {}) {
   return {context, nodes, cleared};
 }
 
+test('reduced-motion preference suppresses confetti elements', () => {
+  const {context} = trainer();
+  context.window.matchMedia = () => ({matches: true});
+  const before = context.document.body.children.length;
+  context.confetti();
+  assert.equal(context.document.body.children.length, before);
+  assert.match(script, /prefers-reduced-motion: reduce/);
+});
+
 test('saved history is capped while retaining the newest 500 results', () => {
   const history = Array.from({length: 500}, (_, i) => ({wpm: i, acc: 90, d: i}));
   const storage = {wpmHist: JSON.stringify(history)};
