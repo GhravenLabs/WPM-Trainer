@@ -3,8 +3,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
-const script = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8')
-  .match(/<script>([\s\S]*?)<\/script>/)[1];
+const html = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
+const script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 
 function trainer(storage = {}) {
   const nodes = new Map(), cleared = [];
@@ -31,6 +31,10 @@ test('reduced-motion preference suppresses confetti elements', () => {
   context.confetti();
   assert.equal(context.document.body.children.length, before);
   assert.match(script, /prefers-reduced-motion: reduce/);
+});
+
+test('keyboard practice area has an accessible name and group role', () => {
+  assert.match(html, /<div id="box" tabindex="0" role="group" aria-label="Typing practice area\. Type the displayed text here\."/);
 });
 
 test('saved history is capped while retaining the newest 500 results', () => {
